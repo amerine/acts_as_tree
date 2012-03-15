@@ -102,14 +102,11 @@ module ActiveRecord
         #
         #   root.all_children # => [child1, subchild1]
         def all_children
-          all = []
-          self.children.each do |child|
+          self.children.inject([]) do |all, child|
             all << child
             subchildren = child.all_children.flatten
-            all << subchildren unless subchildren.empty?
-          end
-          
-          all.flatten
+            all.concat(subchildren)
+          end.flatten
         end
         
         # Returns children (with subchildren) and current node itself.
