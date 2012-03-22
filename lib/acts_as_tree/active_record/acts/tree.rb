@@ -43,8 +43,8 @@ module ActiveRecord
           configuration = { :foreign_key => "parent_id", :order => nil, :counter_cache => nil }
           configuration.update(options) if options.is_a?(Hash)
 
-          belongs_to :parent, :class_name => name, :foreign_key => configuration[:foreign_key], :counter_cache => configuration[:counter_cache]
-          has_many :children, :class_name => name, :foreign_key => configuration[:foreign_key], :order => configuration[:order], :dependent => :destroy
+          belongs_to :parent, :class_name => name, :foreign_key => configuration[:foreign_key], :counter_cache => configuration[:counter_cache], :inverse_of => :children
+          has_many :children, :class_name => name, :foreign_key => configuration[:foreign_key], :order => configuration[:order], :dependent => :destroy, :inverse_of => :parent
 
           class_eval <<-EOV
             include ActiveRecord::Acts::Tree::InstanceMethods

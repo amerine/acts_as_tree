@@ -222,3 +222,20 @@ class TreeTestWithoutOrder < Test::Unit::TestCase
     assert_equal [], [@root1, @root2] - TreeMixinWithoutOrder.roots
   end
 end 
+
+class UnsavedTreeTest < Test::Unit::TestCase
+  def setup
+    setup_db
+    @root = TreeMixin.new
+    @root_child = @root.children.build
+  end
+
+  def teardown
+    teardown_db
+  end
+
+  def test_inverse_of
+    # We want children to be aware of their parent before saving either
+    assert_equal @root, @root_child.parent
+  end
+end
