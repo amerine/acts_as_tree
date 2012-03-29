@@ -90,6 +90,31 @@ module ActiveRecord
         def self_and_siblings
           parent ? parent.children : self.class.roots
         end
+        
+        # Returns children (without subchildren) and current node itself.
+        #
+        #   root.self_and_children # => [root, child1]
+        def self_and_children
+          [self] + self.children
+        end
+        
+        # Returns all children (with subchildren) of the node.
+        #
+        #   root.all_children # => [child1, subchild1]
+        def all_children
+          self.children.inject([]) do |all, child|
+            all << child
+            subchildren = child.all_children.flatten
+            all.concat(subchildren)
+          end.flatten
+        end
+        
+        # Returns children (with subchildren) and current node itself.
+        #
+        #   root.self_and_all_children # => [root, child1, subchild1]
+        def self_and_all_children
+          [self] + self.all_children
+        end
       end
     end
   end

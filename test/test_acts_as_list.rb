@@ -68,6 +68,7 @@ class TreeTest < Test::Unit::TestCase
     @root1 = TreeMixin.create!
     @root_child1 = TreeMixin.create! :parent_id => @root1.id
     @child1_child = TreeMixin.create! :parent_id => @root_child1.id
+    @child1_child_child = TreeMixin.create! :parent_id => @child1_child.id
     @root_child2 = TreeMixin.create! :parent_id => @root1.id
     @root2 = TreeMixin.create!
     @root3 = TreeMixin.create!
@@ -80,7 +81,8 @@ class TreeTest < Test::Unit::TestCase
   def test_children
     assert_equal @root1.children, [@root_child1, @root_child2]
     assert_equal @root_child1.children, [@child1_child]
-    assert_equal @child1_child.children, []
+    assert_equal @child1_child.children, [@child1_child_child]
+    assert_equal @child1_child_child.children, []
     assert_equal @root_child2.children, []
   end
 
@@ -91,7 +93,7 @@ class TreeTest < Test::Unit::TestCase
   end
 
   def test_delete
-    assert_equal 6, TreeMixin.count
+    assert_equal 7, TreeMixin.count
     @root1.destroy
     assert_equal 2, TreeMixin.count
     @root2.destroy
@@ -151,7 +153,22 @@ class TreeTest < Test::Unit::TestCase
     assert_equal [@root_child1, @root_child2], @root_child2.self_and_siblings
     assert_equal [@root1, @root2, @root3], @root2.self_and_siblings
     assert_equal [@root1, @root2, @root3], @root3.self_and_siblings
-  end           
+  end
+  
+  def test_self_and_children
+    assert_equal [@root1, @root_child1, @root_child2], @root1.self_and_children
+    assert_equal [@root2], @root2.self_and_children
+  end
+  
+  def test_all_children
+    assert_equal [@root_child1, @root_child2, @child1_child, @child1_child_child] - @root1.all_children, [] 
+    assert_equal @root2.all_children, []
+  end
+  
+  def test_self_and_all_children
+    assert_equal [@root1, @root_child1, @root_child2, @child1_child, @child1_child_child] - @root1.self_and_all_children, [] 
+    assert_equal @root2.self_and_all_children - [@root2], [] 
+  end
 end
 
 class TreeTestWithEagerLoading < Test::Unit::TestCase
