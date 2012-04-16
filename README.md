@@ -8,7 +8,7 @@ parent–children relationships.
 ## Example
 
     class Category < ActiveRecord::Base
-      include ActiveRecord::Acts:Tree
+      include ActiveRecord::Acts::Tree
 
       acts_as_tree order: "name"
     end
