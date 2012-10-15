@@ -89,15 +89,11 @@ module ActsAsTree
             def self.roots
               order_option = %Q{#{configuration.fetch :order, "nil"}}
 
-              find(:all, conditions: "#{configuration[:foreign_key]} IS NULL",
-                         order:      order_option)
+              where(:#{configuration[:foreign_key]} => nil).order(order_option)
             end
 
             def self.root
-              order_option = %Q{#{configuration.fetch :order, "nil"}}
-
-              find(:first, conditions: "#{configuration[:foreign_key]} IS NULL",
-                           order:      order_option)
+              self.roots.first
             end
       EOV
     end
@@ -139,6 +135,13 @@ module ActsAsTree
     #   root.self_and_children # => [root, child1]
     def self_and_children
       [self] + self.children
+    end
+
+    # Returns ancestors and current node itself.
+    #
+    #   subchild1.self_and_ancestors # => [subchild1, child1, root]
+    def self_and_ancestors
+      [self] + self.ancestors
     end
 
     private
