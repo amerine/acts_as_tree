@@ -161,6 +161,11 @@ class TreeTest < Test::Unit::TestCase
     assert_equal [@root2], @root2.self_and_children
   end
 
+  def test_self_and_ancestors
+    assert_equal [@child1_child, @root_child1, @root1], @child1_child.self_and_ancestors
+    assert_equal [@root2], @root2.self_and_ancestors
+  end
+
   def test_nullify
     root4       = TreeMixinNullify.create!
     root4_child = TreeMixinNullify.create! parent_id: root4.id

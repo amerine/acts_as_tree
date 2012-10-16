@@ -141,6 +141,13 @@ module ActsAsTree
       [self] + self.children
     end
 
+    # Returns ancestors and current node itself.
+    #
+    #   subchild1.self_and_ancestors # => [subchild1, child1, root]
+    def self_and_ancestors
+      [self] + self.ancestors
+    end
+
     private
 
     def update_parents_counter_cache
