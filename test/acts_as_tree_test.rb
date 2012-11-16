@@ -28,6 +28,12 @@ def setup_db
       t.column :parent_id, :integer
       t.column :children_count, :integer, default: 0
     end
+
+    create_table :mixin_action_logs do |t|
+      t.column :parent_mixin_id, :integer
+      t.column :child_mixin_id, :integer
+      t.column :added, :boolean
+    end
   end
 end
 
@@ -60,6 +66,32 @@ end
 class RecursivelyCascadedTreeMixin < Mixin
   acts_as_tree foreign_key: "parent_id"
   has_one :first_child, class_name: 'RecursivelyCascadedTreeMixin', foreign_key: :parent_id
+end
+
+class MixinWithCallbacks < Mixin
+  acts_as_tree :dependent => :nullify, :after_add => :after_add_child, :after_remove => :after_remove_child
+  has_many :mixin_action_logs, :foreign_key => :parent_mixin_id, :order => :id
+
+  def after_add_child(mixin)
+    mal = MixinActionLog.new
+    mal.parent_mixin = self
+    mal.child_mixin = mixin
+    mal.added = true
+    mal.save!
+  end
+
+  def after_remove_child(mixin)
+    mal = MixinActionLog.new
+    mal.parent_mixin = self
+    mal.child_mixin = mixin
+    mal.added = false
+    mal.save!
+  end
+end
+
+class MixinActionLog < ActiveRecord::Base
+  belongs_to :parent_mixin, :class_name => Mixin, :foreign_key => :parent_mixin_id
+  belongs_to :child_mixin, :class_name => Mixin, :foreign_key => :child_mixin_id
 end
 
 class TreeTest < Test::Unit::TestCase
@@ -306,4 +338,60 @@ class TreeTestWithCounterCache < Test::Unit::TestCase
     assert_equal 0, @child1.reload.children_count
   end
 
+end
+
+class AfterAddRemoveCallbacks < Test::Unit::TestCase
+  def setup
+    teardown_db
+    setup_db
+    @root = MixinWithCallbacks.create!
+    @child1 = MixinWithCallbacks.create!
+    @child2 = MixinWithCallbacks.create!
+  end
+
+  def teardown
+    teardown_db
+  end
+
+  def test_uses_callbacks_when_operating_on_parents_children_array
+    assert_equal 0, @root.mixin_action_logs.count
+    
+    @root.children << @child1
+    log = @root.reload.mixin_action_logs.last
+    assert_not_nil log
+    assert_equal @root, log.parent_mixin
+    assert_equal @child1, log.child_mixin
+    assert log.added?
+
+    @root.children << @child2
+    assert_equal 2, @root.reload.mixin_action_logs.count
+    log = @root.reload.mixin_action_logs.last
+    assert_not_nil log
+    assert_equal @root, log.parent_mixin
+    assert_equal @child2, log.child_mixin
+    assert log.added?
+
+    @root.children -= [@child2]
+    assert_equal 3, @root.reload.mixin_action_logs.count
+    assert_equal 1, @root.children.count
+    log = @root.reload.mixin_action_logs.last
+    assert_not_nil log
+    assert_equal @root, log.parent_mixin
+    assert_equal @child2, log.child_mixin
+    assert !log.added?
+
+    @child2.reload
+    @root.children << @child2
+    assert_equal 4, @root.reload.mixin_action_logs.count
+    assert_equal 2, @root.children.count
+
+    @root.children -= [@child1, @child2]
+    assert_equal 6, @root.reload.mixin_action_logs.count
+    assert_equal 0, @root.children.count
+    log = @root.reload.mixin_action_logs.last
+    assert_not_nil log
+    assert_equal @root, log.parent_mixin
+    assert_equal @child2, log.child_mixin
+    assert !log.added?
+  end
 end
