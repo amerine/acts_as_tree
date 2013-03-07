@@ -24,7 +24,7 @@ parent–children relationships.
 
 ## Compatibility
 
-We no longer support Ruby 1.8 or versions if Rails/ActiveRecord older than 3.0. If you're using a version of ActiveRecord older than 3.0 please use 0.1.1.
+We no longer support Ruby 1.8 or versions of Rails/ActiveRecord older than 3.0. If you're using a version of ActiveRecord older than 3.0 please use 0.1.1.
 
 Moving forward we will do our best to support the latest versions of ActiveRecord and Ruby.
 
