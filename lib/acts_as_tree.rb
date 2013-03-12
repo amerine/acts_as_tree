@@ -60,12 +60,18 @@ module ActsAsTree
     #                    this SQL snippet.
     # * <tt>counter_cache</tt> - keeps a count in a +children_count+ column
     #                            if set to +true+ (default: +false+).
+    # * <tt>after_add</tt> -  specifies a callback method to execute after an
+    #                         item has been added to a parent
+    # * <tt>after_remove</tt> - specifies a callback method to execute after 
+    #                           an item has been removed from a its parent
     def acts_as_tree(options = {})
       configuration = {
         foreign_key:   "parent_id",
         order:         nil,
         counter_cache: nil,
-        dependent:     :destroy
+        dependent:     :destroy,
+        after_add:     nil,
+        after_remove:  nil,
       }
 
       configuration.update(options) if options.is_a?(Hash)
@@ -79,6 +85,8 @@ module ActsAsTree
         foreign_key: configuration[:foreign_key],
         order:       configuration[:order],
         dependent:   configuration[:dependent],
+        after_add:   configuration[:after_add],
+        after_remove:configuration[:after_remove],
         inverse_of:  :parent
 
       class_eval <<-EOV
