@@ -75,11 +75,19 @@ module ActsAsTree
         counter_cache: configuration[:counter_cache],
         inverse_of:    :children
 
-      has_many :children, class_name:  name,
-        foreign_key: configuration[:foreign_key],
-        order:       configuration[:order],
-        dependent:   configuration[:dependent],
-        inverse_of:  :parent
+      if ActiveRecord::VERSION::MAJOR >= 4
+        has_many :children, lambda { order configuration[:order] },
+          class_name:  name,
+          foreign_key: configuration[:foreign_key],
+          dependent:   configuration[:dependent],
+          inverse_of:  :parent
+      else
+        has_many :children, class_name:  name,
+          foreign_key: configuration[:foreign_key],
+          order:       configuration[:order],
+          dependent:   configuration[:dependent],
+          inverse_of:  :parent
+      end
 
       class_eval <<-EOV
         include ActsAsTree::InstanceMethods

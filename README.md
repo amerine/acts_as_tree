@@ -7,20 +7,22 @@ parent–children relationships.
 
 ## Example
 
-    class Category < ActiveRecord::Base
-      include ActsAsTree
+```ruby
+class Category < ActiveRecord::Base
+  include ActsAsTree
 
-      acts_as_tree order: "name"
-    end
+  acts_as_tree order: "name"
+end
 
-    root      = Category.create("name" => "root")
-    child1    = root.children.create("name" => "child1")
-    subchild1 = child1.children.create("name" => "subchild1")
+root      = Category.create("name" => "root")
+child1    = root.children.create("name" => "child1")
+subchild1 = child1.children.create("name" => "subchild1")
 
-    root.parent   # => nil
-    child1.parent # => root
-    root.children # => [child1]
-    root.children.first.children.first # => subchild1
+root.parent   # => nil
+child1.parent # => root
+root.children # => [child1]
+root.children.first.children.first # => subchild1
+```
 
 ## Compatibility
 
