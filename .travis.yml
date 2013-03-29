@@ -2,4 +2,21 @@ language: ruby
 rvm:
   - 1.9.2
   - 1.9.3
-  - ruby-head
+  - 2.0.0
+
+gemfile:
+  - gemfiles/rails-3.0.gemfile
+  - gemfiles/rails-3.1.gemfile
+  - gemfiles/rails-3.2.gemfile
+  - gemfiles/rails-4.0.gemfile
+
+matrix:
+  exclude:
+    # rails 4.0 requries ruby 1.9.3 or newer
+    - rvm: 1.9.2
+      gemfile: gemfiles/rails-4.0.gemfile
+    # rails < 3.2 is unsupported on ruby 2.0
+    - rvm: 2.0.0
+      gemfile: gemfiles/rails-3.0.gemfile
+    - rvm: 2.0.0
+      gemfile: gemfiles/rails-3.1.gemfile
