@@ -105,6 +105,38 @@ module ActsAsTree
         end
       EOV
     end
+
+  end
+
+  module Presentation
+    # show records in a tree view
+    # Example:
+    # root
+    #  |_ child1
+    #  |    |_ subchild1
+    #  |    |_ subchild2
+    #  |_ child2
+    #       |_ subchild3
+    #       |_ subchild4
+    #
+    def tree_view(label_method = :to_s,  node = nil, level = -1)
+      if node.nil?
+        puts "root"
+        nodes = roots
+      else
+        label = "|_ #{node.send(label_method)}"
+        if level == 0
+          puts " #{label}"
+        else
+          puts " |#{"    "*level}#{label}"
+        end
+        nodes = node.children
+      end
+      nodes.each do |child|
+        tree_view(label_method, child, level+1)
+      end
+    end
+
   end
 
   module InstanceMethods

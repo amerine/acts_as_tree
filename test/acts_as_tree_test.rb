@@ -201,6 +201,26 @@ class TreeTest < Test::Unit::TestCase
     assert_equal false, @child1_child.leaf?
   end
 
+  def test_tree_view
+    assert_equal false, Mixin.respond_to?(:tree_view)
+    Mixin.extend ActsAsTree::Presentation
+    assert_equal true,  TreeMixin.respond_to?(:tree_view)
+
+    tree_view_outputs = <<-END.gsub(/^ {6}/, '')
+      root
+       |_ 1
+       |    |_ 2
+       |        |_ 3
+       |            |_ 4
+       |    |_ 5
+       |_ 6
+       |_ 7
+    END
+    $stdout.reopen # reinitializes $stdout
+    TreeMixin.tree_view(:id)
+    assert_equal tree_view_outputs, $stdout.string
+  end
+
 end
 
 class TreeTestWithEagerLoading < Test::Unit::TestCase
