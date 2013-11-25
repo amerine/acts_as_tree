@@ -149,6 +149,22 @@ module ActsAsTree
       nodes
     end
 
+    # Returns list of descendants, starting from current node, not including current node.
+    #
+    #   root.descendants # => [child1, child2, subchild1, subchild2, subchild3, subchild4]
+    def descendants
+      children.each_with_object(children) {|child, arr|
+        arr.concat child.descendants
+      }.uniq
+    end
+
+    # Returns list of descendants, starting from current node, including current node.
+    #
+    #   root.self_and_descendants # => [root, child1, child2, subchild1, subchild2, subchild3, subchild4]
+    def self_and_descendants
+      [self] + descendants
+    end
+
     # Returns the root node of the tree.
     def root
       node = self
