@@ -152,7 +152,7 @@ module ActsAsTree
     def descendants
       children.each_with_object(children) {|child, arr|
         arr.concat child.descendants
-      }
+      }.uniq
     end
 
     def self_and_descendants
