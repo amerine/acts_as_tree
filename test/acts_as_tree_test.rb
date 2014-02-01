@@ -166,13 +166,25 @@ class TreeTest < Test::Unit::TestCase
     assert_equal [@root2], @root2.self_and_ancestors
   end
 
-  def test_self_and_descendants
-    assert_equal [@root1, @root_child1, @root_child2, @child1_child, @child1_child_child], @root1.self_and_descendants
+  def test_self_and_ancestorsants
+    children_count_before = @root1.children.count
+    ### Use to_set for equality, currently there's no guarantee for the order
+    assert_equal [@root1, @root_child1, @root_child2, @child1_child, @child1_child_child].to_set, @root1.self_and_descendants.to_set
+    ### check if the method call didn't modify the data structure
+    assert_equal children_count_before, @root1.children.count
+    
+    children_count_before = @root2.children.count
     assert_equal [@root2], @root2.self_and_descendants
+    assert_equal children_count_before, @root2.children.count
   end
 
   def test_descendants
-    assert_equal [@root_child1, @root_child2, @child1_child, @child1_child_child], @root1.descendants
+    children_count_before = @root1.children.count
+    ### Use to_set for equality, currently there's no guarantee for the order
+    assert_equal [@root_child1, @root_child2, @child1_child, @child1_child_child].to_set, @root1.descendants.to_set
+    ### check if the method call didn't modify the data structure
+    assert_equal children_count_before, @root1.children.count
+    
     assert_equal [], @root2.descendants
   end
 

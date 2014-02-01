@@ -152,9 +152,10 @@ module ActsAsTree
     #
     #   root.descendants # => [child1, child2, subchild1, subchild2, subchild3, subchild4]
     def descendants
-      children.each_with_object(children) {|child, arr|
+      children.each_with_object([]) {|child, arr|
+        arr << child
         arr.concat child.descendants
-      }.uniq
+      }
     end
 
     # Returns list of descendants, starting from current node, including current node.
