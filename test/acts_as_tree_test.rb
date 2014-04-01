@@ -148,6 +148,13 @@ class TreeTest < MiniTest::Unit::TestCase
     assert_equal [@root1, @root2], @root3.siblings
   end
 
+
+  def test_descendants2
+    assert_equal [@root_child1, @root_child2, @child1_child, @child1_child_child], @root1.self_and_descendants
+    assert_equal [@root_child1, @root_child2, @child1_child, @child1_child_child], @root1.self_and_descendants
+    assert_equal [], @root2.descendants
+  end
+
   def test_self_and_siblings
     assert_equal [@root1, @root2, @root3], @root1.self_and_siblings
     assert_equal [@root_child1, @root_child2], @root_child1.self_and_siblings
