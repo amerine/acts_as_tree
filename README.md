@@ -59,6 +59,16 @@ In your view you could traverse the tree using
 <% end %>
 ```
 
+You also could use walk_tree as an instance method such as:
+
+```erb
+<% Page.first.walk_tree do |page, level| %>
+  <%= link_to "#{'-'*level}#{page.name}", page_path(page) %><br />
+<% end %>
+```
+
+Notes : ```Page.first.walk_tree``` is almost same as ```Page.walk_tree({:root_instance => Page.first})```
+
 ## Compatibility
 
 We no longer support Ruby 1.8 or versions of Rails/ActiveRecord older than 3.0. If you're using a version of ActiveRecord older than 3.0 please use 0.1.1.

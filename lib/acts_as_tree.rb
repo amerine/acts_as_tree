@@ -175,6 +175,7 @@ module ActsAsTree
     #     :dfs for depth-first search (default)
     #     :bfs for breadth-first search
     #   where: AR where statement to filter certain nodes
+    #   root_instance: walk from an instance as root
     #
     # The given block sets two parameters:
     #   first: The current node
@@ -185,8 +186,20 @@ module ActsAsTree
     #   <%= link_to "#{' '*level}#{page.name}", page_path(page) %><br />
     # <% end %>
     #
+
+    def self.extended(mod)
+      mod.class_eval <<-EOV
+        def walk_tree(_options = {}, level = 0, &block)
+          _options[:root_instance] = self
+          self.class.walk_tree(_options, level, self, &block)
+        end
+      EOV
+
+    end
+
     def walk_tree(_options = {}, level = 0, node = nil, &block)
       options = {:algorithm => :dfs, :where => {}}.update(_options)
+      root = options.delete :root_instance
       case options[:algorithm]
       when :bfs
         nodes = (node.nil? ? roots : node.children).where(options[:where])
@@ -197,8 +210,9 @@ module ActsAsTree
           walk_tree options, level + 1, child, &block
         end
       else
-        if node.nil?
-          roots.where(options[:where]).each do |root_node|
+        if node.nil? or root
+          children = root.nil? ? roots : root.children
+          children.where(options[:where]).each do |root_node|
             walk_tree options, level, root_node, &block
           end
         else
