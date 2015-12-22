@@ -1,7 +1,6 @@
 require 'acts_as_tree/version'
 
 module ActsAsTree
-
   if defined? Rails::Railtie
     require 'acts_as_tree/railtie'
   elsif defined? Rails::Initializer
@@ -228,7 +227,7 @@ module ActsAsTree
     #   subchild1.ancestors # => [child1, root]
     def ancestors
       node, nodes = self, []
-      nodes << node = node.parent while node.parent
+      nodes << node = node.parent while node.parent && node.parent != node
       nodes
     end
 
@@ -251,7 +250,7 @@ module ActsAsTree
     # Returns the root node of the tree.
     def root
       node = self
-      node = node.parent while node.parent
+      node = node.parent while node.parent && node.parent != node
       node
     end
 

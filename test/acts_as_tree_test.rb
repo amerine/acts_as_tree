@@ -535,3 +535,25 @@ class TreeTestWithTouch < MiniTest::Unit::TestCase
     assert @root.updated_at != previous_root_updated_at
   end
 end
+
+class TreeTestWithNodePointingToSelf < MiniTest::Unit::TestCase
+  def setup
+    teardown_db
+    setup_db
+
+    @node = TreeMixin.create!
+    @node.update_attribute(:parent_id, @node.id)
+  end
+
+  def teardown
+    teardown_db
+  end
+
+  def test_root
+    assert_equal @node, @node.root
+  end
+
+  def test_ancestors
+    assert_equal [], @node.ancestors
+  end
+end
