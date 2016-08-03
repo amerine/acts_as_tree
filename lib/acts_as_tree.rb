@@ -54,6 +54,8 @@ module ActsAsTree
   module ClassMethods
     # Configuration options are:
     #
+    # * <tt>primary_key</tt> - specifies the column name for relations
+    #                          (default: +id+)
     # * <tt>foreign_key</tt> - specifies the column name to use for tracking
     #                          of the tree (default: +parent_id+)
     # * <tt>order</tt> - makes it possible to sort the children according to
@@ -63,6 +65,7 @@ module ActsAsTree
     #                            a custom column by passing a symbol or string.
     def acts_as_tree(options = {})
       configuration = {
+        primary_key:   primary_key,
         foreign_key:   "parent_id",
         order:         nil,
         counter_cache: nil,
@@ -78,6 +81,7 @@ module ActsAsTree
 
       belongs_to_opts = {
         class_name:    name,
+        primary_key:   configuration[:primary_key],
         foreign_key:   configuration[:foreign_key],
         counter_cache: configuration[:counter_cache],
         touch:         configuration[:touch],
@@ -91,11 +95,13 @@ module ActsAsTree
       if ActiveRecord::VERSION::MAJOR >= 4
         has_many :children, lambda { order configuration[:order] },
           class_name:  name,
+          primary_key: configuration[:primary_key],
           foreign_key: configuration[:foreign_key],
           dependent:   configuration[:dependent],
           inverse_of:  :parent
       else
         has_many :children, class_name:  name,
+          primary_key: configuration[:primary_key],
           foreign_key: configuration[:foreign_key],
           order:       configuration[:order],
           dependent:   configuration[:dependent],
@@ -135,7 +141,7 @@ module ActsAsTree
         class_eval <<-EOV
           def self.leaves
             internal_ids = select(:#{configuration[:foreign_key]}).where(arel_table[:#{configuration[:foreign_key]}].not_eq(nil))
-            where("id NOT IN (\#{internal_ids.to_sql})").default_tree_order
+            where("\#{connection.quote_column_name('#{configuration[:primary_key]}')} NOT IN (\#{internal_ids.to_sql})").default_tree_order
           end
         EOV
       end
