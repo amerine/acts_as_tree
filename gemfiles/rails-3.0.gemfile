@@ -2,5 +2,6 @@ source "https://rubygems.org"
 
 gem "rails", "~> 3.0.0"
 gem "i18n", "< 0.7"
+gem "rake", "< 11"
 
 gemspec path: "../"
