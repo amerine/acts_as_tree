@@ -145,7 +145,7 @@ module ActsAsTree
         end
 
       else
-        # Fallback to less efficent ways to find leaves.
+        # Fallback to less efficient ways to find leaves.
         class_eval <<-EOV
           def self.leaves
             internal_ids = select(:#{configuration[:foreign_key]}).where(arel_table[:#{configuration[:foreign_key]}].not_eq(nil))
