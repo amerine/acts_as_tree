@@ -112,7 +112,7 @@ module ActsAsTree
         include ActsAsTree::InstanceMethods
 
         def self.default_tree_order
-          order_option = #{configuration[:order].inspect}
+          order_option = Arel.sql(#{configuration[:order].inspect})
           order(order_option)
         end
 
@@ -303,15 +303,15 @@ module ActsAsTree
       self.class.select {|node| node.tree_level == self.tree_level }
     end
 
-    # Returns the level (depth) of the current node 
+    # Returns the level (depth) of the current node
     #
     #  root1child1.tree_level # => 1
     def tree_level
       self.ancestors.size
     end
 
-    # Returns the level (depth) of the current node unless level is a column on the node. 
-    # Allows backwards compatibility with older versions of the gem.  
+    # Returns the level (depth) of the current node unless level is a column on the node.
+    # Allows backwards compatibility with older versions of the gem.
     # Allows integration with apps using level as a column name.
     #
     #  root1child1.level # => 1
