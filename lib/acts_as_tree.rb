@@ -112,7 +112,11 @@ module ActsAsTree
         include ActsAsTree::InstanceMethods
 
         def self.default_tree_order
-          order_option = Arel.sql(#{configuration[:order].inspect})
+          if ActiveRecord::VERSION::MAJOR > 5 || ActiveRecord::VERSION::MAJOR == 5 && ActiveRecord::VERSION::MINOR >= 2
+            order_option = Arel.sql(#{configuration[:order].inspect})
+          else
+            order_option = #{configuration[:order].inspect}
+          end
           order(order_option)
         end
 
