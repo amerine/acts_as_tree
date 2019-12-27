@@ -90,7 +90,11 @@ module ActsAsTree
 
       belongs_to_opts[:optional] = true if ActiveRecord::VERSION::MAJOR >= 5
 
-      belongs_to :parent, **belongs_to_opts
+      if ActiveRecord::VERSION::MAJOR > 5 || (ActiveRecord::VERSION::MAJOR == 5 && ActiveRecord::VERSION::MINOR >= 2)
+        belongs_to :parent, **belongs_to_opts
+      else
+        belongs_to :parent, belongs_to_opts
+      end
 
       if ActiveRecord::VERSION::MAJOR >= 4
         has_many :children, lambda { order configuration[:order] },
