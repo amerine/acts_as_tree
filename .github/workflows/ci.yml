@@ -35,7 +35,7 @@ jobs:
           - ruby-version: 2.7
             gemfile: gemfiles/rails-7.0.gemfile
           # test latest rails and ruby
-          - ruby-version: 3.0
+          - ruby-version: '3.0'
             gemfile: gemfiles/rails-7.0.gemfile
           - ruby-version: 3.1
             gemfile: gemfiles/rails-7.0.gemfile
