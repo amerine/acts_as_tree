@@ -317,6 +317,7 @@ module ActsAsTree
     # Returns the level (depth) of the current node unless level is a column on the node. 
     # Allows backwards compatibility with older versions of the gem.  
     # Allows integration with apps using level as a column name.
+    # If column `level` exists please remember about taking care of proper calculation. 
     #
     #  root1child1.level # => 1
     def level
