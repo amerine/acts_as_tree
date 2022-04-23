@@ -1,4 +1,3 @@
-# -*- encoding: utf-8 -*-
 $:.push File.expand_path("../lib", __FILE__)
 require 'acts_as_tree/version'
 
@@ -10,10 +9,9 @@ Gem::Specification.new do |s|
   s.homepage    = 'https://github.com/amerine/acts_as_tree'
   s.summary     = %q{Provides a simple tree behaviour to active_record models.}
   s.description = %q{A gem that adds simple support for organizing ActiveRecord models into parent–children relationships.}
+  s.license     = 'MIT'
 
   s.files         = `git ls-files`.split("\n")
-  s.test_files    = `git ls-files -- {test,features}/*`.split("\n")
-  s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
   s.rdoc_options  = ["--charset=UTF-8"]
 
