@@ -117,6 +117,14 @@ module ActsAsTree
 
       include ActsAsTree::InstanceMethods
 
+      define_singleton_method :acts_as_tree_primary_key do
+        configuration[:primary_key]
+      end
+
+      define_singleton_method :acts_as_tree_foreign_key do
+        configuration[:foreign_key]
+      end
+
       define_singleton_method :default_tree_order do
         order(configuration[:order])
       end
@@ -250,33 +258,62 @@ module ActsAsTree
     # Returns list of ancestors, starting from parent until root.
     #
     #   subchild1.ancestors # => [child1, root]
-    def ancestors
-      node, nodes = self, []
-      nodes << node = node.parent while node.parent
-      nodes
+    if ActiveRecord::VERSION::MAJOR > 7 || ActiveRecord::VERSION::MAJOR == 7 && ActiveRecord::VERSION::MINOR >= 2
+      def ancestors
+        self_and_ancestors.excluding self
+      end
+    else
+      def ancestors
+        node, nodes = self, []
+        nodes << node = node.parent while node.parent
+        nodes
+      end
     end
 
     # Returns list of descendants, starting from current node, not including current node.
     #
     #   root.descendants # => [child1, child2, subchild1, subchild2, subchild3, subchild4]
-    def descendants
-      children.each_with_object(children.to_a) {|child, arr|
-        arr.concat child.descendants
-      }.uniq
+    if ActiveRecord::VERSION::MAJOR > 7 || ActiveRecord::VERSION::MAJOR == 7 && ActiveRecord::VERSION::MINOR >= 2
+      def descendants
+        self_and_descendants.excluding self
+      end
+    else
+      def descendants
+        children.each_with_object(children.to_a) {|child, arr|
+          arr.concat child.descendants
+        }.uniq
+      end
     end
 
     # Returns list of descendants, starting from current node, including current node.
     #
     #   root.self_and_descendants # => [root, child1, child2, subchild1, subchild2, subchild3, subchild4]
-    def self_and_descendants
-      [self] + descendants
+    if ActiveRecord::VERSION::MAJOR > 7 || ActiveRecord::VERSION::MAJOR == 7 && ActiveRecord::VERSION::MINOR >= 2
+      def self_and_descendants
+        self.class.where self.class.acts_as_tree_primary_key => self.class.with_recursive(
+          search_tree: [
+            self.class.where(self.class.acts_as_tree_primary_key => send(self.class.acts_as_tree_primary_key)),
+            self.class.joins("JOIN search_tree ON #{self.class.table_name}.#{self.class.acts_as_tree_foreign_key} = search_tree.#{self.class.acts_as_tree_primary_key}")
+          ]
+        ).select(self.class.acts_as_tree_primary_key).from("search_tree")
+      end
+    else
+      def self_and_descendants
+        [self] + descendants
+      end
     end
 
     # Returns the root node of the tree.
-    def root
-      node = self
-      node = node.parent while node.parent
-      node
+    if ActiveRecord::VERSION::MAJOR > 7 || ActiveRecord::VERSION::MAJOR == 7 && ActiveRecord::VERSION::MINOR >= 2
+      def root
+        self_and_ancestors.find_by self.class.acts_as_tree_foreign_key => nil
+      end
+    else
+      def root
+        node = self
+        node = node.parent while node.parent
+        node
+      end
     end
 
     # Returns all siblings of the current node.
@@ -307,15 +344,15 @@ module ActsAsTree
       self.class.select {|node| node.tree_level == self.tree_level }
     end
 
-    # Returns the level (depth) of the current node 
+    # Returns the level (depth) of the current node
     #
     #  root1child1.tree_level # => 1
     def tree_level
       self.ancestors.size
     end
 
-    # Returns the level (depth) of the current node unless level is a column on the node. 
-    # Allows backwards compatibility with older versions of the gem.  
+    # Returns the level (depth) of the current node unless level is a column on the node.
+    # Allows backwards compatibility with older versions of the gem.
     # Allows integration with apps using level as a column name.
     #
     #  root1child1.level # => 1
@@ -337,8 +374,19 @@ module ActsAsTree
     # Returns ancestors and current node itself.
     #
     #   subchild1.self_and_ancestors # => [subchild1, child1, root]
-    def self_and_ancestors
-      [self] + self.ancestors
+    if ActiveRecord::VERSION::MAJOR > 7 || ActiveRecord::VERSION::MAJOR == 7 && ActiveRecord::VERSION::MINOR >= 2
+      def self_and_ancestors
+        self.class.where self.class.acts_as_tree_primary_key => self.class.with_recursive(
+          search_tree: [
+            self.class.where(self.class.acts_as_tree_primary_key => send(self.class.acts_as_tree_primary_key)),
+            self.class.joins("JOIN search_tree ON #{self.class.table_name}.#{self.class.acts_as_tree_primary_key} = search_tree.#{self.class.acts_as_tree_foreign_key}")
+          ]
+        ).select(self.class.acts_as_tree_primary_key).from("search_tree")
+      end
+    else
+      def self_and_ancestors
+        [self] + self.ancestors
+      end
     end
 
     # Returns true if node has no parent, false otherwise

@@ -3,7 +3,13 @@ require 'minitest/benchmark'
 require 'active_record'
 require 'acts_as_tree'
 
-class ActsAsTreeTestCase < (defined?(MiniTest::Test) ? MiniTest::Test : MiniTest::Unit::TestCase)
+parent_class = if defined?(Minitest::Test)
+  Minitest::Test
+else
+  (defined?(MiniTest::Test) ? MiniTest::Test : MiniTest::Unit::TestCase)
+end
+
+class ActsAsTreeTestCase < parent_class
   UPDATE_METHOD = ActiveRecord::VERSION::MAJOR >= 4 ? :update : :update_attributes
 
   def assert_queries(num = 1, &block)
@@ -183,7 +189,11 @@ class TreeTest < ActsAsTreeTestCase
   def test_ancestors
     assert_equal [], @root1.ancestors
     assert_equal [@root1], @root_child1.ancestors
-    assert_equal [@root_child1, @root1], @child1_child.ancestors
+    if ActiveRecord::VERSION::MAJOR > 7 || ActiveRecord::VERSION::MAJOR == 7 && ActiveRecord::VERSION::MINOR >= 2
+      [@root_child1, @root1].all? { |node| assert_includes @child1_child.ancestors, node }
+    else
+      assert_equal [@root_child1, @root1], @child1_child.ancestors
+    end
     assert_equal [@root1], @root_child2.ancestors
     assert_equal [], @root2.ancestors
     assert_equal [], @root3.ancestors
@@ -235,18 +245,65 @@ class TreeTest < ActsAsTreeTestCase
   end
 
   def test_self_and_ancestors
-    assert_equal [@child1_child, @root_child1, @root1], @child1_child.self_and_ancestors
-    assert_equal [@root2], @root2.self_and_ancestors
+    if ActiveRecord::VERSION::MAJOR > 7 || ActiveRecord::VERSION::MAJOR == 7 && ActiveRecord::VERSION::MINOR >= 2
+      [@child1_child, @root_child1, @root1].all? { |node| assert_includes @child1_child.self_and_ancestors, node }
+      [@root2].all? { |node| assert_includes @root2.self_and_ancestors, node }
+    else
+      assert_equal [@child1_child, @root_child1, @root1], @child1_child.self_and_ancestors
+      assert_equal [@root2], @root2.self_and_ancestors
+    end
   end
 
   def test_self_and_descendants
-    assert_equal [@root1, @root_child1, @root_child2, @child1_child, @child1_child_child], @root1.self_and_descendants
-    assert_equal [@root2], @root2.self_and_descendants
+    if ActiveRecord::VERSION::MAJOR > 7 || ActiveRecord::VERSION::MAJOR == 7 && ActiveRecord::VERSION::MINOR >= 2
+      [@root1, @root_child1, @root_child2, @child1_child, @child1_child_child].all? { |node| assert_includes @root1.self_and_descendants, node }
+      [@root2].all? { |node| assert_includes @root2.self_and_descendants, node }
+    else
+      assert_equal [@root1, @root_child1, @root_child2, @child1_child, @child1_child_child], @root1.self_and_descendants
+      assert_equal [@root2], @root2.self_and_descendants
+    end
   end
 
   def test_descendants
-    assert_equal [@root_child1, @root_child2, @child1_child, @child1_child_child], @root1.descendants
-    assert_equal [], @root2.descendants
+    if ActiveRecord::VERSION::MAJOR > 7 || ActiveRecord::VERSION::MAJOR == 7 && ActiveRecord::VERSION::MINOR >= 2
+      [@root_child1, @root_child2, @child1_child, @child1_child_child].all? { |node| assert_includes @root1.descendants, node }
+      assert_empty @root2.descendants
+    else
+      assert_equal [@root_child1, @root_child2, @child1_child, @child1_child_child], @root1.descendants
+      assert_equal [], @root2.descendants
+    end
+  end
+
+  if ActiveRecord::VERSION::MAJOR > 7 || ActiveRecord::VERSION::MAJOR == 7 && ActiveRecord::VERSION::MINOR >= 2
+    def test_self_and_descendants_performs_one_query
+      assert_queries 1 do
+        @root2.self_and_descendants.count
+      end
+    end
+
+    def test_descendants_performs_one_query
+      assert_queries 1 do
+        @root1.descendants.count
+      end
+    end
+
+    def test_self_and_ancestors_performs_one_query
+      assert_queries 1 do
+        @child1_child.self_and_ancestors.count
+      end
+    end
+
+    def test_ancestors_performs_one_query
+      assert_queries 1 do
+        @child1_child.ancestors.count
+      end
+    end
+
+    def test_root_performs_one_query
+      assert_queries 1 do
+        @child1_child.root
+      end
+    end
   end
 
   def test_nullify

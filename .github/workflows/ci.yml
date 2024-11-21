@@ -39,6 +39,23 @@ jobs:
             gemfile: gemfiles/rails-7.0.gemfile
           - ruby-version: 3.1
             gemfile: gemfiles/rails-7.0.gemfile
+          - ruby-version: 3.2
+            gemfile: gemfiles/rails-7.0.gemfile
+          - ruby-version: 3.3
+            gemfile: gemfiles/rails-7.0.gemfile
+          - ruby-version: 3.1
+            gemfile: gemfiles/rails-7.1.gemfile
+          - ruby-version: 3.2
+            gemfile: gemfiles/rails-7.1.gemfile
+          - ruby-version: 3.3
+            gemfile: gemfiles/rails-7.1.gemfile
+          # rails 7.2 requires ruby >= 3.1.0
+          - ruby-version: 3.1
+            gemfile: gemfiles/rails-7.2.gemfile
+          - ruby-version: 3.2
+            gemfile: gemfiles/rails-7.2.gemfile
+          - ruby-version: 3.3
+            gemfile: gemfiles/rails-7.2.gemfile
 
     runs-on: ubuntu-latest
 
