@@ -383,6 +383,3 @@ module ActsAsTree
     end
   end
 end
-
-# Deprecating the following code in the future.
-require 'acts_as_tree/active_record/acts/tree'

@@ -3,7 +3,7 @@ require 'minitest/benchmark'
 require 'active_record'
 require 'acts_as_tree'
 
-class ActsAsTreeTestCase < (defined?(MiniTest::Test) ? MiniTest::Test : MiniTest::Unit::TestCase)
+class ActsAsTreeTestCase < (defined?(Minitest::Test) ? Minitest::Test : Minitest::Unit::TestCase)
   UPDATE_METHOD = ActiveRecord::VERSION::MAJOR >= 4 ? :update : :update_attributes
 
   def assert_queries(num = 1, &block)
@@ -628,4 +628,3 @@ class GenerationMethods < ActsAsTreeTestCase
     assert_equal 'Has Level Column', @level_column.level
   end
 end
-
